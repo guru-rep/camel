@@ -13,24 +13,39 @@ spec:
     command:
     - cat
     tty: true
-    resources:
-      requests:
-        memory: "1Gi"
-        cpu: "500m"
-      limits:
-        memory: "2Gi"
-        cpu: "1"
+    volumeMounts:
+    - name: maven-cache
+      mountPath: /home/jenkins/.m2
+  volumes:
+  - name: maven-cache
+    emptyDir: {}
 """
         }
     }
 
+    environment {
+        MAVEN_OPTS = "-Dmaven.repo.local=/home/jenkins/.m2/repository"
+    }
+
     stages {
+        stage('Restore Maven Cache') {
+            steps {
+                readCache name: 'mvn-cache'
+            }
+        }
+
         stage('Build with Maven') {
             steps {
                 container('maven') {
                     sh 'mvn install -DskipTests'
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            writeCache name: 'mvn-cache', includes: '**/.m2/repository/**'
         }
     }
 }
