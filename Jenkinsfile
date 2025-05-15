@@ -45,7 +45,7 @@ spec:
 
     post {
         success {
-            writeCache name: 'mvn-cache', includes: '**/.m2/repository/**'
+            writeCache name: 'mvn-cache', includes: '/home/jenkins/.m2/repository/**'
         }
     }
 }
