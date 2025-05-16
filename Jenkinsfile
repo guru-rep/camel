@@ -34,7 +34,21 @@ spec:
         stage('Build with Maven') {
             steps {
                 container('maven') {
+                    sh '''
+        echo "📦 Number of files in maven local repo before build:"
+        find /home/jenkins/.m2/repository -type f | wc -l
+
+        echo "🧮 Total size of local Maven repo before build:"
+        du -sh /home/jenkins/.m2/repository
                     sh 'mvn install -DskipTests -Dmaven.repo.local=./maven-repo'
+                    // New summary block
+      sh '''
+        echo "📦 Number of files in maven local repo files after:"
+        find /home/jenkins/.m2/repository -type f | wc -l
+
+        echo "🧮 Total size of local Maven repo after build:"
+        du -sh /home/jenkins/.m2/repository
+      '''
                 }
             }
         }
