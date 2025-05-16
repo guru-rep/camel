@@ -30,7 +30,6 @@ spec:
         }
     }
 
-  
     stages {
         stage('Restore Maven Cache') {
             steps {
@@ -42,20 +41,20 @@ spec:
             steps {
                 container('maven') {
                     sh '''
-        echo "📦 Number of files in maven local repo before build:"
-        find /home/jenkins/.m2/repository -type f | wc -l
+                        echo "📦 Number of files in Maven local repo before build:"
+                        find ./maven-repo -type f | wc -l || echo "0"
 
-        echo "🧮 Total size of local Maven repo before build:"
-        du -sh /home/jenkins/.m2/repository
+                        echo "🧮 Total size of Maven local repo before build:"
+                        du -sh ./maven-repo || echo "0"
+                    '''
                     sh 'mvn install -DskipTests -Dmaven.repo.local=./maven-repo'
-                    // New summary block
-      sh '''
-        echo "📦 Number of files in maven local repo files after:"
-        find /home/jenkins/.m2/repository -type f | wc -l
+                    sh '''
+                        echo "📦 Number of files in Maven local repo after build:"
+                        find ./maven-repo -type f | wc -l
 
-        echo "🧮 Total size of local Maven repo after build:"
-        du -sh /home/jenkins/.m2/repository
-      '''
+                        echo "🧮 Total size of Maven local repo after build:"
+                        du -sh ./maven-repo
+                    '''
                 }
             }
         }
@@ -63,7 +62,6 @@ spec:
 
     post {
         success {
-           
             writeCache name: 'mvn-cache', includes: 'maven-repo/**'
         }
     }
