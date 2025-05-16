@@ -15,10 +15,10 @@ spec:
     tty: true
     resources:
       requests:
-        memory: "2Gi"
+        memory: "6Gi"
         cpu: "1000m"
       limits:
-        memory: "4Gi"
+        memory: "6Gi"
         cpu: "2000m"
     volumeMounts:
     - name: maven-cache
