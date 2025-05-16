@@ -13,6 +13,13 @@ spec:
     command:
     - cat
     tty: true
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "1000m"
+      limits:
+        memory: "4Gi"
+        cpu: "2000m"
     volumeMounts:
     - name: maven-cache
       mountPath: /home/jenkins/.m2
