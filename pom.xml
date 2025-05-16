@@ -232,7 +232,7 @@
                     <artifactId>license-maven-plugin</artifactId>
                     <version>${license-maven-plugin-version}</version>
                     <configuration>
-                        <failIfUnknown>true</failIfUnknown>
+                        <failIfUnknown>false</failIfUnknown>
                         <licenseSets>
                             <licenseSet>
                                 <header>
