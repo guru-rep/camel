@@ -47,7 +47,7 @@ spec:
                         echo "🧮 Total size of Maven local repo before build:"
                         du -sh ./maven-repo || echo "0"
                     '''
-                    sh 'mvn install -DskipTests -Dmaven.repo.local=./maven-repo'
+                    sh 'mvn install -DskipTests -Dmaven.repo.local=/home/jenkins/agent/workspace/maven-repo'
                     sh '''
                         echo "📦 Number of files in Maven local repo after build:"
                         find ./maven-repo -type f | wc -l
@@ -62,7 +62,7 @@ spec:
 
     post {
         success {
-            writeCache name: 'mvn-cache', includes: 'maven-repo/**'
+            writeCache name: 'mvn-cache', includes: '/home/jenkins/agent/workspace/maven-repo/**'
         }
     }
 }
