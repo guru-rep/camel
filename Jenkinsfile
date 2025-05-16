@@ -23,10 +23,7 @@ spec:
         }
     }
 
-    environment {
-        MAVEN_OPTS = "-Dmaven.repo.local=/home/jenkins/.m2/repository"
-    }
-
+  
     stages {
         stage('Restore Maven Cache') {
             steps {
@@ -37,7 +34,7 @@ spec:
         stage('Build with Maven') {
             steps {
                 container('maven') {
-                    sh 'mvn install -DskipTests'
+                    sh 'mvn install -DskipTests -Dmaven.repo.local=./maven-repo'
                 }
             }
         }
@@ -45,7 +42,8 @@ spec:
 
     post {
         success {
-            writeCache name: 'mvn-cache', includes: '/home/jenkins/.m2/repository/**'
+           
+            writeCache name: 'mvn-cache', includes: 'maven-repo/**'
         }
     }
 }
