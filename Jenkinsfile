@@ -33,7 +33,11 @@ spec:
     stages {
         stage('Restore Maven Cache') {
             steps {
-                readCache name: 'mvn-cache'
+                container('maven') {
+                    // Ensure the directory exists before restoring
+                    sh 'mkdir -p maven-repo'
+                }
+                readCache name: 'mvn-cache', dir: 'maven-repo'
             }
         }
 
@@ -42,18 +46,18 @@ spec:
                 container('maven') {
                     sh '''
                         echo "📦 Number of files in Maven local repo before build:"
-                        find /home/jenkins/agent/workspace/maven-repo -type f | wc -l || echo "0"
+                        find maven-repo -type f | wc -l || echo "0"
 
                         echo "🧮 Total size of Maven local repo before build:"
-                        du -sh /home/jenkins/agent/workspace/maven-repo || echo "0"
+                        du -sh maven-repo || echo "0"
                     '''
-                    sh 'mvn install -DskipTests -Dmaven.repo.local=/home/jenkins/agent/workspace/maven-repo'
+                    sh 'mvn install -DskipTests -Dmaven.repo.local=maven-repo'
                     sh '''
                         echo "📦 Number of files in Maven local repo after build:"
-                        find /home/jenkins/agent/workspace/maven-repo -type f | wc -l
+                        find maven-repo -type f | wc -l
 
                         echo "🧮 Total size of Maven local repo after build:"
-                        du -sh /home/jenkins/agent/workspace/maven-repo
+                        du -sh maven-repo
                     '''
                 }
             }
@@ -62,7 +66,7 @@ spec:
 
     post {
         success {
-            writeCache name: 'mvn-cache', includes: '../maven-repo/**'
+            writeCache name: 'mvn-cache', includes: 'maven-repo/**'
         }
     }
 }
