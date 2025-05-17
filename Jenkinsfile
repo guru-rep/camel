@@ -62,7 +62,7 @@ spec:
 
     post {
         success {
-            writeCache name: 'mvn-cache', includes: '/home/jenkins/agent/workspace/maven-repo/**'
+            writeCache name: 'mvn-cache', includes: '../maven-repo/**'
         }
     }
 }
