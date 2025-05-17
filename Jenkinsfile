@@ -30,14 +30,23 @@ spec:
         }
     }
 
+    environment {
+        // Tell Maven where to store its downloaded dependencies
+        MAVEN_REPO = 'maven-repo'
+    }
+
     stages {
-        stage('Restore Maven Cache') {
+        stage('Prepare Workspace') {
             steps {
                 container('maven') {
-                    // Ensure the directory exists before restoring
-                    sh 'mkdir -p maven-repo'
+                    sh 'mkdir -p ${MAVEN_REPO}'
                 }
-                readCache name: 'mvn-cache', dir: 'maven-repo'
+            }
+        }
+
+        stage('Restore Maven Cache') {
+            steps {
+                readCache name: 'mvn-cache'
             }
         }
 
@@ -46,18 +55,18 @@ spec:
                 container('maven') {
                     sh '''
                         echo "📦 Number of files in Maven local repo before build:"
-                        find maven-repo -type f | wc -l || echo "0"
+                        find ${MAVEN_REPO} -type f | wc -l || echo "0"
 
                         echo "🧮 Total size of Maven local repo before build:"
-                        du -sh maven-repo || echo "0"
+                        du -sh ${MAVEN_REPO} || echo "0"
                     '''
-                    sh 'mvn install -DskipTests -Dmaven.repo.local=maven-repo'
+                    sh 'mvn install -DskipTests -Dmaven.repo.local=${MAVEN_REPO}'
                     sh '''
                         echo "📦 Number of files in Maven local repo after build:"
-                        find maven-repo -type f | wc -l
+                        find ${MAVEN_REPO} -type f | wc -l
 
                         echo "🧮 Total size of Maven local repo after build:"
-                        du -sh maven-repo
+                        du -sh ${MAVEN_REPO}
                     '''
                 }
             }
