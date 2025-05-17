@@ -10,8 +10,7 @@ spec:
   containers:
   - name: maven
     image: maven:3.9-eclipse-temurin-17
-    command:
-    - cat
+    command: ['cat']
     tty: true
     resources:
       requests:
@@ -20,30 +19,15 @@ spec:
       limits:
         memory: "6Gi"
         cpu: "2000m"
-    volumeMounts:
-    - name: maven-cache
-      mountPath: /home/jenkins/.m2
-  volumes:
-  - name: maven-cache
-    emptyDir: {}
 """
         }
     }
 
     environment {
-        // Tell Maven where to store its downloaded dependencies
-        MAVEN_REPO = 'maven-repo'
+        MAVEN_REPO_LOCAL = "${env.WORKSPACE}/.m2/repository"
     }
 
     stages {
-        stage('Prepare Workspace') {
-            steps {
-                container('maven') {
-                    sh 'mkdir -p ${MAVEN_REPO}'
-                }
-            }
-        }
-
         stage('Restore Maven Cache') {
             steps {
                 readCache name: 'mvn-cache'
@@ -54,19 +38,19 @@ spec:
             steps {
                 container('maven') {
                     sh '''
-                        echo "📦 Number of files in Maven local repo before build:"
-                        find ${MAVEN_REPO} -type f | wc -l || echo "0"
+                        echo "📦 Files before build:"
+                        find .m2/repository -type f | wc -l || echo "0"
 
-                        echo "🧮 Total size of Maven local repo before build:"
-                        du -sh ${MAVEN_REPO} || echo "0"
-                    '''
-                    sh 'mvn install -DskipTests -Dmaven.repo.local=${MAVEN_REPO}'
-                    sh '''
-                        echo "📦 Number of files in Maven local repo after build:"
-                        find ${MAVEN_REPO} -type f | wc -l
+                        echo "🧮 Size before build:"
+                        du -sh .m2/repository || echo "0"
 
-                        echo "🧮 Total size of Maven local repo after build:"
-                        du -sh ${MAVEN_REPO}
+                        mvn install -DskipTests -Dmaven.repo.local=.m2/repository
+
+                        echo "📦 Files after build:"
+                        find .m2/repository -type f | wc -l
+
+                        echo "🧮 Size after build:"
+                        du -sh .m2/repository
                     '''
                 }
             }
@@ -75,7 +59,7 @@ spec:
 
     post {
         success {
-            writeCache name: 'mvn-cache', includes: 'maven-repo/**'
+            writeCache name: 'mvn-cache', includes: '.m2/repository/**'
         }
     }
 }
