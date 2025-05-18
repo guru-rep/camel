@@ -65,6 +65,13 @@ spec:
     post {
         success {
             dir('/tmp/jenkins') {
+                sh '''
+                        echo "📦 Number of files in Maven local repo after build:"
+                        find /tmp/jenkins/maven-repo -type f | wc -l
+
+                        echo "🧮 Total size of Maven local repo after build:"
+                        du -sh /tmp/jenkins/maven-repo
+                    '''
                 writeCache name: 'mvn-cache', includes: 'maven-repo/**'
             }
         }
