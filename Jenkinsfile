@@ -33,9 +33,13 @@ spec:
     stages {
         stage('Restore Maven Cache') {
             steps {
-                dir('/tmp/jenkins') {
+                dir('maven-cache') {
                     readCache name: 'mvn-cache'
                 }
+                sh '''
+                    mkdir -p /tmp/jenkins/maven-repo
+                    cp -r maven-cache/* /tmp/jenkins/maven-repo || true
+                '''
             }
         }
 
@@ -64,15 +68,15 @@ spec:
 
     post {
         success {
-            dir('/tmp/jenkins') {
+            container('maven') {
                 sh '''
-                        echo "📦 Number of files in Maven local repo after build:"
-                        find /tmp/jenkins/maven-repo -type f | wc -l
-
-                        echo "🧮 Total size of Maven local repo after build:"
-                        du -sh /tmp/jenkins/maven-repo
-                    '''
-                writeCache name: 'mvn-cache', includes: 'maven-repo/**'
+                    echo "📦 Copying Maven repo to workspace for caching..."
+                    mkdir -p $WORKSPACE/maven-cache
+                    cp -r /tmp/jenkins/maven-repo/* $WORKSPACE/maven-cache || true
+                '''
+                dir('maven-cache') {
+                    writeCache name: 'mvn-cache', includes: '**'
+                }
             }
         }
     }
